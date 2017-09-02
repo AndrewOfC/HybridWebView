@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 
 using Foundation;
 using UIKit;
@@ -20,9 +21,10 @@ namespace HybridWebViewTest.iOS
       Console.WriteLine("Base: {0}", basepath);
       Console.WriteLine("Temp: {0}", tmppath);
       global::Xamarin.Forms.Forms.Init();
-      LoadApplication(new App());
 
+      var html = new StreamReader(new FileStream("testpage.html", FileMode.Open)).ReadToEnd() ;
 
+      LoadApplication(new App(html));
 
       return base.FinishedLaunching(app, options);
     }

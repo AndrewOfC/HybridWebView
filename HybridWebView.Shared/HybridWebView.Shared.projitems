@@ -10,5 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)HybridWebView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IHybridWebPage.cs" />
   </ItemGroup>
 </Project>

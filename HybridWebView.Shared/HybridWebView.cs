@@ -2,15 +2,10 @@
 
 using Xamarin.Forms;
 
-namespace HybridWebView
+namespace UtilityWebViews
 {
-  public class HybridWebView : View
+  public class HybridWebView : View, IHybridWebPage
   {
-    public HybridWebView()
-    {
-      Console.WriteLine("Loaded");
-    }
-
     public event Action<HybridWebView, Uri> UriClicked;
 
     /// <summary>
@@ -43,27 +38,35 @@ namespace HybridWebView
     /// <value>The html.</value>
     public string Html { get => (string)GetValue(HtmlProperty); set => SetValue(HtmlProperty, value); }
 
-    /// <summary>
-    /// Override as necessary to filter uris.  By default it will allow file uris to be loaded
-    /// to allow loading of the page.   Needs to be public so the renderer can call it but we mark
-    /// it with a python-esque private marker.
-    /// 
-    /// https://docs.python.org/3/tutorial/classes.html#private-variables
-    /// </summary>
-    /// <returns><c>true</c>, if handle URI was shoulded, <c>false</c> otherwise.</returns>
-    /// <param name="uri">URI.</param>
-    public virtual bool _ShouldHandleUri(Uri uri)
+    private IHybridWebPage pageHandler;
+
+    public void Forward()
+    {
+      if (pageHandler == null)
+        return; // not ready
+      pageHandler.Forward();
+    }
+
+    public void Back()
+    {
+      if (pageHandler == null)
+        return;
+      pageHandler.Back();
+    }
+
+    public void _setPageHandler(IHybridWebPage pageHandler)
+    {
+      this.pageHandler = pageHandler;
+    }
+
+    public virtual bool ShouldHandleUri(Uri uri, bool linkClicked)
     {
       if (uri.Scheme == "file")
         return true;
-      UriClicked?.Invoke(this, uri);
-
-      return false;
+      if (linkClicked)
+        UriClicked?.Invoke(this, uri);
+      return false ;
     }
 
-  }
-
-  class HWV2 : HybridWebView {
-    
   }
 }

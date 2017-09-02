@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 using Android.App;
 using Android.Content;
@@ -8,6 +9,8 @@ using Android.Views;
 using Android.Widget;
 using Android.OS;
 
+
+
 namespace HybridWebViewTest.Droid
 {
   [Activity(Label = "HybridWebViewTest.Droid", Icon = "@drawable/icon", Theme = "@style/MyTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
@@ -15,14 +18,13 @@ namespace HybridWebViewTest.Droid
   {
     protected override void OnCreate(Bundle bundle)
     {
-      TabLayoutResource = Resource.Layout.Tabbar;
-      ToolbarResource = Resource.Layout.Toolbar;
-
       base.OnCreate(bundle);
+
+      var html = new StreamReader(Assets.Open("testpage.html")).ReadToEnd();
 
       global::Xamarin.Forms.Forms.Init(this, bundle);
 
-      LoadApplication(new App());
+      LoadApplication(new App(html));
     }
 
     protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)

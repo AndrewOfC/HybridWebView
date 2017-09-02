@@ -6,11 +6,11 @@ namespace HybridWebViewTest
 {
   public partial class App : Application
   {
-    public App()
+    public App(string html)
     {
       InitializeComponent();
 
-      MainPage = new HybridWebViewTestPage();
+      MainPage = new HybridWebViewTestPage(html);
     }
   }
 }

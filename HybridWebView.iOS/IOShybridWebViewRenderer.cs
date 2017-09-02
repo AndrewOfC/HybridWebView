@@ -7,15 +7,15 @@ using UIKit;
 
 using D = System.Diagnostics.Debug;
 
-using HybridWebViewNS ;
+using UtilityWebViews ;
 
-[assembly: ExportRenderer(typeof(HybridWebView), typeof(HybridWebViewRenderer))]
-namespace HybridWebView
+[assembly: ExportRenderer(typeof(HybridWebView), typeof(IOShybridWebViewRenderer))]
+namespace UtilityWebViews
 {
   /// <summary>
   /// IOS Renderer
   /// </summary>
-  public class HybridWebViewRenderer : ViewRenderer<HybridWebView, UIWebView>
+  public class IOShybridWebViewRenderer : ViewRenderer<HybridWebView, UIWebView>, IHybridWebPage
   {
     protected override void OnElementPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -50,10 +50,11 @@ namespace HybridWebView
       }
       if (e.OldElement != null)
       {
-        // var hybridWebView = e.OldElement as HybridWebView; // any clean up?
+        e.OldElement._setPageHandler(null);
       }
       if (e.NewElement != null)
       {
+        e.NewElement._setPageHandler(this);
         if (Element.Html != null)
         {
           Control.LoadHtmlString(Element.Html, new NSUrl(""));
@@ -69,8 +70,24 @@ namespace HybridWebView
 
     private bool shouldLoad(UIWebView webView, NSUrlRequest request, UIWebViewNavigationType navigationType)
     {
-      return Element._ShouldHandleUri(new Uri(request.Url.ToString()));
+      var uri = new Uri(request.Url.AbsoluteString);
+      var linkClicked = navigationType == UIWebViewNavigationType.LinkClicked;
+      var doLoad = Element.ShouldHandleUri(uri, linkClicked);
+      if (doLoad && linkClicked )
+        Element.Html = null; // otherwise we don't get a property change call when reloading.
+      return doLoad;
     }
 
+    public void Forward()
+    {
+      if( Control.CanGoForward )
+        Control.GoForward();
+    }
+
+    public void Back()
+    {
+      if (Control.CanGoBack)
+        Control.GoBack();
+    }
   }
 }
