@@ -5,7 +5,7 @@ using System.Linq;
 using Foundation;
 using UIKit;
 
-namespace HybridWebViewTest.iOS
+namespace UtilityViews.Test.iOS
 {
   public class Application
   {

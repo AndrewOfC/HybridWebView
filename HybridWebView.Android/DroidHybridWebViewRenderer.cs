@@ -5,11 +5,11 @@ using Xamarin.Forms.Platform.Android;
 
 using Android.Webkit;
 
-using UtilityWebViews;
+using UtilityViews;
 
 
 [assembly: ExportRenderer(typeof(HybridWebView), typeof(DroidHybridWebViewRenderer))]
-namespace UtilityWebViews
+namespace UtilityViews
 {
   public class DroidHybridWebViewRenderer : ViewRenderer<HybridWebView, Android.Webkit.WebView>, IHybridWebPage
   {
@@ -59,11 +59,11 @@ namespace UtilityWebViews
       }
       if (e.OldElement != null)
       {
-        e.OldElement._setPageHandler(null);
+        e.OldElement._setPageRenderer(null);
       }
       if (e.NewElement != null)
       {
-        e.NewElement._setPageHandler(this);
+        e.NewElement._setPageRenderer(this);
         if (Element.Html != null)
         {
           Control.LoadData(Element.Html, "text/html; charset=UTF-8", null);

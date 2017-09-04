@@ -6,7 +6,7 @@ using System.IO;
 using Foundation;
 using UIKit;
 
-namespace HybridWebViewTest.iOS
+namespace UtilityViews.Test.iOS
 {
   [Register("AppDelegate")]
   public partial class AppDelegate : global::Xamarin.Forms.Platform.iOS.FormsApplicationDelegate

@@ -2,7 +2,7 @@
 
 using Xamarin.Forms;
 
-namespace UtilityWebViews
+namespace UtilityViews
 {
   public interface IHybridWebPage 
   {

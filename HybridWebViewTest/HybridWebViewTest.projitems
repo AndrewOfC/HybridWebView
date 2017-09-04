@@ -6,15 +6,21 @@
     <SharedGUID>{CF8899D5-2132-46D1-BDA6-5E1E9C2545FE}</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>HybridWebViewTest</Import_RootNamespace>
+    <Import_RootNamespace>UtilityViews.Test</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)HybridWebViewTestPage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HybridWebViewTestPage2.xaml.cs">
+      <DependentUpon>HybridWebViewTestPage2.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)App.xaml" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)HybridWebViewTestPage2.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

@@ -7,10 +7,10 @@ using UIKit;
 
 using D = System.Diagnostics.Debug;
 
-using UtilityWebViews ;
+using UtilityViews ;
 
 [assembly: ExportRenderer(typeof(HybridWebView), typeof(IOShybridWebViewRenderer))]
-namespace UtilityWebViews
+namespace UtilityViews
 {
   /// <summary>
   /// IOS Renderer
@@ -50,11 +50,11 @@ namespace UtilityWebViews
       }
       if (e.OldElement != null)
       {
-        e.OldElement._setPageHandler(null);
+        e.OldElement._setPageRenderer(null);
       }
       if (e.NewElement != null)
       {
-        e.NewElement._setPageHandler(this);
+        e.NewElement._setPageRenderer(this);
         if (Element.Html != null)
         {
           Control.LoadHtmlString(Element.Html, new NSUrl(""));

@@ -11,7 +11,7 @@ using Android.OS;
 
 
 
-namespace HybridWebViewTest.Droid
+namespace UtilityViews.Test.Droid
 {
   [Activity(Label = "HybridWebViewTest.Droid", Icon = "@drawable/icon", Theme = "@style/MyTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
   public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity

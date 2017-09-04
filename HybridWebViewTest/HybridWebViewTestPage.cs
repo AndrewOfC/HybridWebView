@@ -4,28 +4,79 @@ using System.Linq;
 
 using Xamarin.Forms;
 
-using UtilityWebViews;
+using UtilityViews;
 
 using D = System.Diagnostics.Debug;
 
-namespace HybridWebViewTest
+namespace UtilityViews.Test
 {
-
+  /// <summary>
+  /// A Sample of using the HybridWebView to implement a white list
+  /// of Uri's.  
+  /// </summary>
   class WhiteListWebView : HybridWebView
   {
-    private HashSet<Uri> whiteList;
+    private HashSet<Uri> _whiteList;
+    private HashSet<Uri> _openers;
 
-    public WhiteListWebView(IEnumerable<Uri> whites)
+    /// <summary>
+    /// Gets or sets the white list.
+    /// </summary>
+    /// <value>The white list.</value>
+    public IEnumerable<Uri> whiteList {
+      get => _whiteList;
+      set => _whiteList = new HashSet<Uri>(value);
+    }
+
+    /// <summary>
+    /// Gets or sets the Uri's that will be opened.
+    /// </summary>
+    /// <value>The openers.</value>
+    public IEnumerable<Uri> openers
+    {
+      get => _openers;
+      set => _openers = new HashSet<Uri>(value);
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="T:UtilityViews.Test.WhiteListWebView"/> class.
+    /// </summary>
+    /// <param name="whites">Uri's to whitelist</param>
+    public WhiteListWebView(IEnumerable<Uri> whites, IEnumerable<Uri> openers)
     {
       whiteList = new HashSet<System.Uri>(whites);
+      this.openers = new HashSet<System.Uri>(openers);
     }
 
+    /// <summary>
+    /// Parameterless Ctor for Xaml preview for Visual Studio
+    /// </summary>
+    public WhiteListWebView()
+    {
+      whiteList = new HashSet<System.Uri>();
+      openers = new HashSet<System.Uri>();
+    }
+
+    /// <summary>
+    /// Handle the Uri IF it appears in our white list
+    /// </summary>
+    /// <returns><c>true</c>if the URI should be followed<c>false</c> otherwise.</returns>
+    /// <param name="uri">URI.</param>
+    /// <param name="linkClicked">If set to <c>true</c> link clicked.</param>
     public override bool ShouldHandleUri(Uri uri, bool linkClicked)
     {
-      bool result = base.ShouldHandleUri(uri, linkClicked) || whiteList.Contains(uri) ;
-      D.WriteLine("{0} uri = {1}", result, uri);
-      return result;
+      var baseResult = base.ShouldHandleUri(uri, linkClicked);
+
+      if( openers.Contains(uri) ) {
+        Device.OpenUri(uri);
+        return false; // we're handling this
+      }
+
+
+      return baseResult || whiteList.Contains(uri) ;
     }
+
+
   }
 
   public class HybridWebViewTestPage : ContentPage
@@ -34,11 +85,18 @@ namespace HybridWebViewTest
 
     public HybridWebViewTestPage(string html)
     {
-      var whites = new Uri[] { new Uri("https://google.com"), new Uri("https://www.google.com") };
 
-      var hybridWebView = new WhiteListWebView(whites) { HorizontalOptions = LayoutOptions.FillAndExpand, VerticalOptions = LayoutOptions.FillAndExpand, Html = html };
+      /* NOTE  two entries for google, if you hit google.com you will
+       * get a 301 redirect which will invoke the ShouldHandleUri method again
+       */
+      var whites = new Uri[] { new Uri("https://google.com"), 
+        new Uri("https://www.google.com") };
+      var openers = new Uri[] { new Uri("http://weather.com") };
+      
 
-      statusLabel = new Label() { HorizontalOptions = LayoutOptions.FillAndExpand, BackgroundColor = Color.Blue };
+      var hybridWebView = new WhiteListWebView(whites, openers) { HorizontalOptions = LayoutOptions.FillAndExpand, VerticalOptions = LayoutOptions.FillAndExpand, Html = html };
+
+      statusLabel = new Label() { HorizontalOptions = LayoutOptions.FillAndExpand };
 
       hybridWebView.UriClicked += (view, uri) => statusLabel.Text = uri.AbsoluteUri;
 

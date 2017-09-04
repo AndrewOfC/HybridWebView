@@ -2,8 +2,12 @@
 
 using Xamarin.Forms;
 
-namespace UtilityWebViews
+namespace UtilityViews
 {
+  /// <summary>
+  /// A WebView that allows you to check a Uri before loading to handle.
+  /// it differently.  
+  /// </summary>
   public class HybridWebView : View, IHybridWebPage
   {
     public event Action<HybridWebView, Uri> UriClicked;
@@ -38,27 +42,55 @@ namespace UtilityWebViews
     /// <value>The html.</value>
     public string Html { get => (string)GetValue(HtmlProperty); set => SetValue(HtmlProperty, value); }
 
-    private IHybridWebPage pageHandler;
+    private IHybridWebPage pageRenderer;
 
+    /// <summary>
+    /// Go forward 1 step in the WebView's hisory
+    /// </summary>
     public void Forward()
     {
-      if (pageHandler == null)
+      if (pageRenderer == null)
         return; // not ready
-      pageHandler.Forward();
+      pageRenderer.Forward();
     }
 
+    /// <summary>
+    /// Go back 1 step in the WebView's hisory
+    /// </summary>
     public void Back()
     {
-      if (pageHandler == null)
+      if (pageRenderer == null)
         return;
-      pageHandler.Back();
+      pageRenderer.Back();
     }
 
-    public void _setPageHandler(IHybridWebPage pageHandler)
+    /// <summary>
+    /// Called by the renderer so the HybridWebView may invoke
+    /// platform specific services.
+    /// </summary>
+    /// <param name="pageRenderer">Page renderer.</param>
+    public void _setPageRenderer(IHybridWebPage pageRenderer)
     {
-      this.pageHandler = pageHandler;
+      this.pageRenderer = pageRenderer;
     }
 
+    /// <summary>
+    /// Check the Uri.  
+    /// </summary>
+    /// 
+    /// the base class should be called as it provides the service of
+    /// firing the UriClicked event.  <see cref="HybridWebView.UriClicked"/>
+    /// 
+    /// <code>
+    /// 
+    /// base.ShouldHandleUri(uri, linkClicked) || myTest(uri) ;
+    /// 
+    /// </code>
+    /// 
+    /// 
+    /// <returns><c>true</c>if the uri is to be followed<c>false</c> otherwise.</returns>
+    /// <param name="uri">URI.</param>
+    /// <param name="linkClicked">If set to <c>true</c> we arrived here as a result of user clicking a link</param>
     public virtual bool ShouldHandleUri(Uri uri, bool linkClicked)
     {
       if (uri.Scheme == "file")
