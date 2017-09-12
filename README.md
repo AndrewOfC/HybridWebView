@@ -30,7 +30,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 # Example
 ```csharp
-
+using UtilityViews ;
  /// <summary>
   /// A Sample of using the HybridWebView to implement a white list
   /// of Uri's.  
