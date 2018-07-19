@@ -22,6 +22,8 @@
  */
 
 using System;
+using System.Collections.Generic;
+
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
 
@@ -30,16 +32,46 @@ using UIKit;
 
 using D = System.Diagnostics.Debug;
 
-using UtilityViews ;
+using UtilityViews;
+using WebKit;
+using CoreGraphics;
+using ObjCRuntime;
 
 [assembly: ExportRenderer(typeof(HybridWebView), typeof(IOShybridWebViewRenderer))]
 namespace UtilityViews
 {
+
+
+  internal class NavDel : WKNavigationDelegate {
+
+    private Func<NSUrlRequest, bool, bool> doAllow;
+
+    internal NavDel(Func<NSUrlRequest, bool, bool> doAllow)
+    {
+      this.doAllow = doAllow;
+    }
+
+    public override void DecidePolicy(WKWebView webView, WKNavigationAction navigationAction, Action<WKNavigationActionPolicy> decisionHandler)
+    {
+      if (navigationAction.NavigationType == WKNavigationType.Other)
+      {
+        decisionHandler(WKNavigationActionPolicy.Allow);
+        return;
+      }
+      decisionHandler(doAllow(navigationAction.Request, navigationAction.NavigationType == WKNavigationType.LinkActivated) ? WKNavigationActionPolicy.Allow: WKNavigationActionPolicy.Cancel);
+    }
+  }
+
+
   /// <summary>
   /// IOS Renderer
   /// </summary>
-  public class IOShybridWebViewRenderer : ViewRenderer<HybridWebView, UIWebView>, IHybridWebPage
+  public class IOShybridWebViewRenderer : ViewRenderer<HybridWebView, WKWebView>, IWKScriptMessageHandler, IWKUIDelegate, IHybridWebPage
   {
+    WKUserContentController userController;
+
+    private Dictionary<string, Action<object> > callbacks = new Dictionary<string, Action<object> >();
+
     protected override void OnElementPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
       base.OnElementPropertyChanged(sender, e);
@@ -48,6 +80,7 @@ namespace UtilityViews
       if (hwv.Html != null && e.PropertyName == "Html")
       {
         Control.LoadHtmlString(hwv.Html, new NSUrl(""));
+
         return;
       }
 
@@ -62,14 +95,19 @@ namespace UtilityViews
       base.OnElementChanged(e);
       if (Control == null)
       {
-        var nativeWebView = new UIWebView();
+        userController = new WKUserContentController();
 
-        /*
-         * Set the delegate that will check if the requested url should be loaded
-         */
-        nativeWebView.ShouldStartLoad = shouldLoad;
+        WKPreferences preferences = new WKPreferences() { JavaScriptEnabled = true };
 
-        SetNativeControl(nativeWebView);
+        var config = new WKWebViewConfiguration { UserContentController = userController, Preferences = preferences  };
+
+        var webView = new WKWebView(Frame, config);
+        webView.UIDelegate = this;
+
+        webView.NavigationDelegate = new NavDel(shouldLoad);
+
+        SetNativeControl(webView);
+
       }
       if (e.OldElement != null)
       {
@@ -83,7 +121,6 @@ namespace UtilityViews
           Control.LoadHtmlString(Element.Html, new NSUrl(""));
           return;
         }
-
         if (Element.Uri != null)
         {
           Control.LoadRequest(new NSUrlRequest(new NSUrl(Element.Uri)));
@@ -91,12 +128,11 @@ namespace UtilityViews
       }
     }
 
-    private bool shouldLoad(UIWebView webView, NSUrlRequest request, UIWebViewNavigationType navigationType)
+    private bool shouldLoad(NSUrlRequest request, bool linkClicked)
     {
       var uri = new Uri(request.Url.AbsoluteString);
-      var linkClicked = navigationType == UIWebViewNavigationType.LinkClicked;
       var doLoad = Element.ShouldHandleUri(uri, linkClicked);
-      if (doLoad && linkClicked )
+      if ( doLoad && linkClicked )
         Element.Html = null; // otherwise we don't get a property change call when reloading.
       return doLoad;
     }
@@ -111,6 +147,51 @@ namespace UtilityViews
     {
       if (Control.CanGoBack)
         Control.GoBack();
+    }
+
+    public void RegisterCallbackForJS(string name, Action<object> cb)
+    {
+      if( cb == null ) {
+        callbacks.Remove(name);
+        return;
+      }
+
+      string JavaScriptFunction = string.Format("function {0}(data){{window.webkit.messageHandlers.{0}.postMessage(data);}}", name) ;
+    
+      var script = new WKUserScript(new NSString(JavaScriptFunction), WKUserScriptInjectionTime.AtDocumentStart, false);
+      userController.AddUserScript(script);
+      userController.AddScriptMessageHandler(this, name);
+
+      callbacks[name] = cb;
+    }
+
+    public void EvaluateJS(string javscript)
+    {
+      Control.EvaluateJavaScript(new NSString(javscript), HandleWKJavascriptEvaluationResult);
+    }
+
+    void HandleWKJavascriptEvaluationResult(NSObject result, NSError error)
+    {
+      Console.WriteLine("JS Result = {0}  error = {1}", result, error);
+    }
+
+
+    [Export("webView:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:")]
+    public void RunJavaScriptAlertPanel(WKWebView webView, string message, WKFrameInfo frame, Action completionHandler)
+    {
+      Console.WriteLine("JS Alert:  " + message);
+      completionHandler();
+    }
+
+    public void DidReceiveScriptMessage(WKUserContentController userContentController, WKScriptMessage message)
+    {
+      Console.WriteLine("message:  {0} {1}", message.Name, message.Body);
+      Action<object> cb;
+      if( ! callbacks.TryGetValue(message.Name, out cb) ) {
+        Console.Error.WriteLine("callback \"{0}\" not found", message.Name);
+        return;
+      }
+      cb(message.Body);
     }
   }
 }

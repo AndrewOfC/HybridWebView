@@ -22,6 +22,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 
 using Xamarin.Forms;
 
@@ -34,6 +35,7 @@ namespace UtilityViews
   public class HybridWebView : View, IHybridWebPage
   {
     public event Action<HybridWebView, Uri> UriClicked;
+    private List<Tuple<string, Action<object>>> pendingJSCallbacks = new List<Tuple<string, Action<object>>>();
 
     /// <summary>
     /// Backing store for the Uri property
@@ -72,9 +74,7 @@ namespace UtilityViews
     /// </summary>
     public void Forward()
     {
-      if (pageRenderer == null)
-        return; // not ready
-      pageRenderer.Forward();
+      pageRenderer?.Forward();
     }
 
     /// <summary>
@@ -82,9 +82,7 @@ namespace UtilityViews
     /// </summary>
     public void Back()
     {
-      if (pageRenderer == null)
-        return;
-      pageRenderer.Back();
+      pageRenderer?.Back();
     }
 
     /// <summary>
@@ -95,6 +93,9 @@ namespace UtilityViews
     public void _setPageRenderer(IHybridWebPage pageRenderer)
     {
       this.pageRenderer = pageRenderer;
+      foreach( var tpl in pendingJSCallbacks) {
+        pageRenderer.RegisterCallbackForJS(tpl.Item1, tpl.Item2);
+      }
     }
 
     /// <summary>
@@ -123,5 +124,18 @@ namespace UtilityViews
       return false ;
     }
 
+    public void RegisterCallbackForJS(string name, Action<object> cb)
+    {
+      if( pageRenderer == null ) {
+        pendingJSCallbacks.Add(new Tuple<string, Action<object>>(name, cb));
+        return;
+      }
+      pageRenderer.RegisterCallbackForJS(name, cb);
+    }
+
+    public void EvaluateJS(string javscript)
+    {
+      pageRenderer?.EvaluateJS(javscript);
+    }
   }
 }

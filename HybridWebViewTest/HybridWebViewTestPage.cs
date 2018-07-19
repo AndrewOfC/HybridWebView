@@ -119,6 +119,9 @@ namespace UtilityViews.Test
 
       var hybridWebView = new WhiteListWebView(whites, openers) { HorizontalOptions = LayoutOptions.FillAndExpand, VerticalOptions = LayoutOptions.FillAndExpand, Html = html };
 
+      hybridWebView.RegisterCallbackForJS("iosconsole", (o) => Console.WriteLine("{0}", o)) ;
+
+
       statusLabel = new Label() { HorizontalOptions = LayoutOptions.FillAndExpand };
 
       hybridWebView.UriClicked += (view, uri) => statusLabel.Text = uri.AbsoluteUri;

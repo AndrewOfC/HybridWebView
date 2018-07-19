@@ -33,6 +33,7 @@ namespace UtilityViews.Test
     public HybridWebViewTestPage2()
     {
       InitializeComponent();
+      webView.RegisterCallbackForJS("iosconsole", (o) => Console.WriteLine("{0}", o));
     }
 
     public HybridWebViewTestPage2(string html)
@@ -46,8 +47,12 @@ namespace UtilityViews.Test
 
       webView.whiteList = whites;
       webView.openers = openers;
+      webView.RegisterCallbackForJS("iosconsole", (o) => Console.WriteLine("{0}", o));
+    }
 
-
+    private void onClick(object sender, EventArgs args)
+    {
+      webView.EvaluateJS("invokeIOSconsole(\"Hello World\") ;");
     }
   }
 }

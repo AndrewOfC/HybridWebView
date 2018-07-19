@@ -27,10 +27,23 @@ using Xamarin.Forms;
 
 namespace UtilityViews
 {
+
+  /// <summary>
+  /// Interface to be implmented by the 
+  /// Platform Independent HybridWebView and its
+  /// underlying renderers.   Typically the 
+  /// Platform Independent HybridWebView will simply make
+  /// the call to the same routine in the renderer.
+  /// 
+  /// </summary>
   public interface IHybridWebPage 
   {
     void Forward();
     void Back();
+
+    void RegisterCallbackForJS(string name, Action<object> cb) ;
+    void EvaluateJS(string javascript);
+
   }
 }
 

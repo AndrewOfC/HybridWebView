@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:UtilityViews.Test;assembly=HybridWebViewTest" x:Class="UtilityViews.Test.HybridWebViewTestPage2">
+<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms" 
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+            xmlns:local="clr-namespace:UtilityViews.Test;assembly=HybridWebViewTest" x:Class="UtilityViews.Test.HybridWebViewTestPage2">
     <TabbedPage.Children>
         <ContentPage Title="Page1">
             <ContentPage.Content>
-                <local:WhiteListWebView x:Name="webView" Html="Foo" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" />
+                <StackLayout Orientation="Vertical">
+                    <local:WhiteListWebView x:Name="webView" Html="Foo" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" />
+                    <Button Clicked="onClick" Text="CallJS"/>
+                   </StackLayout>
             </ContentPage.Content>
         </ContentPage>
         <ContentPage Title="Page2">

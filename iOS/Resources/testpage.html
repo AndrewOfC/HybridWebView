@@ -1,13 +1,33 @@
 <!DOCTYPE html>
 <html>
-  <head>
-  </head>
-  <body>
+<head>
+</head>
+<body>
     <font size=+3>
-      <a href="http://weather.com">weather.com</a>(open)<br>
-      <a href="https://google.com">google.com</a>(whitelist)<br>
-      
+        <a href="http://weather.com">weather.com</a>(open)<br>
+        <a href="https://google.com">google.com</a>(whitelist)<br>
+        <br />
+        <br />
+        <div id="thediv">Div Text</div><br />
+        <button onclick="onPush()">Button</button>
+
     </font>
-  </body>
+
+    <script>// window.onload = function() { alert("I am an alert box!"); }
+
+function invokeIOSconsole(message) {
+       iosconsole(message) ;
+   }
+
+function onPush() {
+    try {
+            iosconsole("log message") ;
+    }
+    catch( err ) {
+        alert("caught " + err.message) ;
+    }
+}</script>
+</body>
+
   
 <html>
