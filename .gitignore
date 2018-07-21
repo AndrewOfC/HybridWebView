@@ -40,3 +40,4 @@ Thumbs.db
 *.dotCover
 /spares
 UserPrefs.xml
+.vs
