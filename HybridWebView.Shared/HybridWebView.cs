@@ -133,9 +133,9 @@ namespace UtilityViews
       pageRenderer.RegisterCallbackForJS(name, cb);
     }
 
-    public void EvaluateJS(string javscript)
+    public void EvaluateJS(string javscript, Action<object> handleJavaScriptReturnValue)
     {
-      pageRenderer?.EvaluateJS(javscript);
+      pageRenderer?.EvaluateJS(javscript, handleJavaScriptReturnValue);
     }
   }
 }

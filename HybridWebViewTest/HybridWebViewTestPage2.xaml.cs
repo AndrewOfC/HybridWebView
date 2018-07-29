@@ -24,6 +24,8 @@
 using System;
 using System.Collections.Generic;
 
+using D = System.Diagnostics.Debug;
+
 using Xamarin.Forms;
 
 namespace UtilityViews.Test
@@ -34,6 +36,7 @@ namespace UtilityViews.Test
     {
       InitializeComponent();
       webView.RegisterCallbackForJS("iosconsole", (o) => Console.WriteLine("{0}", o));
+
     }
 
     public HybridWebViewTestPage2(string html)
@@ -52,7 +55,7 @@ namespace UtilityViews.Test
 
     private void onClick(object sender, EventArgs args)
     {
-      webView.EvaluateJS("invokeIOSconsole(\"Hello World\") ;");
+      webView.EvaluateJS("[]", (o) => { D.WriteLine("4 = {0}", o); });
     }
   }
 }

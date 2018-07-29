@@ -165,14 +165,15 @@ namespace UtilityViews
       callbacks[name] = cb;
     }
 
-    public void EvaluateJS(string javscript)
+    public void EvaluateJS(string javscript, Action<object> cb)
     {
-      Control.EvaluateJavaScript(new NSString(javscript), HandleWKJavascriptEvaluationResult);
+      Control.EvaluateJavaScript(new NSString(javscript), (result, error) => { HandleWKJavascriptEvaluationResult(result, error, cb); } );
     }
 
-    void HandleWKJavascriptEvaluationResult(NSObject result, NSError error)
+    void HandleWKJavascriptEvaluationResult(NSObject result, NSError error, Action<object> cb)
     {
       Console.WriteLine("JS Result = {0}  error = {1}", result, error);
+      cb?.Invoke(result);
     }
 
 

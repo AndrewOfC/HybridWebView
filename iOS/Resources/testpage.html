@@ -3,6 +3,7 @@
 <head>
 </head>
 <body>
+    
     <font size=+3>
         <a href="http://weather.com">weather.com</a>(open)<br>
         <a href="https://google.com">google.com</a>(whitelist)<br>
@@ -13,21 +14,22 @@
 
     </font>
 
-    <script>// window.onload = function() { alert("I am an alert box!"); }
-
-function invokeIOSconsole(message) {
-       iosconsole(message) ;
-   }
+    <script>function invokeIOSconsole(message) {
+            iosconsole(message);
+}
 
 function onPush() {
-    try {
-            iosconsole("log message") ;
-    }
-    catch( err ) {
-        alert("caught " + err.message) ;
-    }
+            console.log("foo logy");
+            iosconsole_jsBridge.invokeAction([]);
+            iosconsole("log message");
+
+            try {
+
+            }
+            catch (err) {
+                alert("caught " + err.message);
+            }
 }</script>
 </body>
 
-  
 <html>

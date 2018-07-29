@@ -42,7 +42,7 @@ namespace UtilityViews
     void Back();
 
     void RegisterCallbackForJS(string name, Action<object> cb) ;
-    void EvaluateJS(string javascript);
+    void EvaluateJS(string javascript, Action<object> handleJavaScriptReturnValue);
 
   }
 }

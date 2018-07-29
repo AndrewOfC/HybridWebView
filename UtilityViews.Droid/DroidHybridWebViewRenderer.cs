@@ -22,22 +22,65 @@
  */
 
 using System;
+using D = System.Diagnostics.Debug;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
+using Java.Interop;
 
 using Android.Webkit;
 
 using UtilityViews;
 using Android.Content;
+using Java.Lang;
 
 [assembly: ExportRenderer(typeof(HybridWebView), typeof(DroidHybridWebViewRenderer))]
 namespace UtilityViews
 {
+  public class JSBridge : Java.Lang.Object
+  {
+    readonly WeakReference<DroidHybridWebViewRenderer> hybridWebViewRenderer;
+    private Action<object> callback ;
+
+    public JSBridge(DroidHybridWebViewRenderer hybridRenderer, Action<object> callback)
+    {
+      this.callback = callback;
+      hybridWebViewRenderer = new WeakReference<DroidHybridWebViewRenderer>(hybridRenderer);
+    }
+
+    [Export("invokeAction")]
+    [JavascriptInterface]
+    public void InvokeAction(Java.Lang.String data)
+    {
+      D.WriteLine("invoking \"{0}\"", data);
+      DroidHybridWebViewRenderer hybridRenderer;
+
+      if (hybridWebViewRenderer != null && hybridWebViewRenderer.TryGetTarget(out hybridRenderer))
+      {
+        callback(data);
+      }
+    }
+
+    [Export("invokeAction")]
+    [JavascriptInterface]
+    public void InvokeAction(Java.Lang data)
+    {
+      D.WriteLine("invoking \"{0}\"", data);
+      DroidHybridWebViewRenderer hybridRenderer;
+
+      if (hybridWebViewRenderer != null && hybridWebViewRenderer.TryGetTarget(out hybridRenderer))
+      {
+        callback(data);
+      }
+    }
+  }
+
   public class DroidHybridWebViewRenderer : ViewRenderer<HybridWebView, Android.Webkit.WebView>, IHybridWebPage
   {
+    private Context context;
     public DroidHybridWebViewRenderer(Context context) : base(context)
     {
+      this.context = context;
     }
 
     protected class webClient : WebViewClient {
@@ -79,7 +122,8 @@ namespace UtilityViews
 
       if (Control == null)
       {
-        var webView = new Android.Webkit.WebView(Forms.Context);
+        var webView = new Android.Webkit.WebView(context);
+        webView.Settings.JavaScriptEnabled = true;
         webView.SetWebViewClient(new webClient(this));
         SetNativeControl(webView);
       }
@@ -118,12 +162,42 @@ namespace UtilityViews
 
     public void RegisterCallbackForJS(string name, Action<object> cb)
     {
-      // throw new NotImplementedException();
+      Control.AddJavascriptInterface(new JSBridge(this, cb), name + "_jsBridge");
+      string JavaScriptInvokeFunction = string.Format("function {0}(data){{  {0}_jsBridge.invokeAction(data);}}", name) ;
+      D.WriteLine("javascript enabled {0}", Control.Settings.JavaScriptEnabled);
+
+      EvaluateJS(JavaScriptInvokeFunction, (o) => { 
+        D.WriteLine("reg result = {0}", o); 
+      });
+
+
     }
 
-    public void EvaluateJS(string javascript)
+    internal class JavaScriptCallback : Java.Lang.Object, IValueCallback
     {
-      throw new NotImplementedException();
+      // public IntPtr Handle => throw new NotImplementedException();
+
+      Action<object> action;
+
+      public JavaScriptCallback(Action<object> action)
+      {
+        this.action = action;
+      }
+
+      public void Dispose()
+      {
+        this.action = null;
+      }
+
+      public void OnReceiveValue(Java.Lang.Object value)
+      {
+        action?.Invoke(value);
+      }
+    }
+
+    public void EvaluateJS(string javascript, Action<object> handleJavaScriptReturnValue)
+    {
+      Control.EvaluateJavascript(javascript, handleJavaScriptReturnValue == null ? null : new JavaScriptCallback(handleJavaScriptReturnValue));
     }
   }
 }
